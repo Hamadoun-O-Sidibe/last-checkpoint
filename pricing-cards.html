@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cartes de prix</title>
+  <style>
+    /* ---------- Styles globaux ---------- */
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(160deg, #eef2ff 0%, #f8fafc 50%, #ecfeff 100%);
+      color: #0f172a;
+    }
+
+    .page {
+      width: min(1100px, calc(100% - 32px));
+      padding: 40px 0;
+    }
+
+    .page-title {
+      text-align: center;
+      margin: 0 0 8px;
+      font-size: clamp(1.6rem, 3vw, 2.1rem);
+    }
+
+    .page-subtitle {
+      text-align: center;
+      margin: 0 0 32px;
+      color: #475569;
+    }
+
+    /* ---------- Grille de cartes ---------- */
+    #cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 24px;
+      align-items: stretch;
+    }
+
+    /* ---------- Carte ---------- */
+    .pricing {
+      display: flex;
+      flex-direction: column;
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-radius: 16px;
+      padding: 28px 24px;
+      box-shadow: 0 12px 30px rgba(15, 23, 42, 0.08);
+      text-align: left;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .pricing:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 18px 36px rgba(15, 23, 42, 0.12);
+    }
+
+    .pricing.is-featured {
+      border-color: #2563eb;
+      box-shadow: 0 16px 40px rgba(37, 99, 235, 0.18);
+    }
+
+    .title {
+      margin: 0;
+      font-size: 1.35rem;
+      font-weight: 700;
+    }
+
+    .price {
+      margin: 12px 0 20px;
+      font-size: 1.75rem;
+      font-weight: 700;
+      color: #047857;
+    }
+
+    .features {
+      list-style: none;
+      margin: 0 0 24px;
+      padding: 0;
+      flex: 1;
+    }
+
+    .features li {
+      padding: 10px 0;
+      border-bottom: 1px solid #e2e8f0;
+      color: #334155;
+    }
+
+    .features li:last-child {
+      border-bottom: none;
+    }
+
+    /* ---------- Bouton ---------- */
+    .btn {
+      width: 100%;
+      padding: 12px 20px;
+      border: none;
+      border-radius: 10px;
+      background: #2563eb;
+      color: #ffffff;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background-color 0.2s ease, transform 0.15s ease;
+    }
+
+    .btn:hover {
+      background: #1d4ed8;
+    }
+
+    .btn:active {
+      transform: scale(0.98);
+      background: #1e40af;
+    }
+
+    .btn:focus-visible {
+      outline: 3px solid #93c5fd;
+      outline-offset: 2px;
+    }
+
+    .btn.is-selected,
+    .btn.is-selected:hover,
+    .btn.is-selected:active {
+      background: #047857;
+    }
+
+    .btn.is-selected:hover {
+      background: #065f46;
+    }
+
+    .message {
+      min-height: 1.4em;
+      margin: 12px 0 0;
+      font-size: 0.9rem;
+      color: #047857;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <h1 class="page-title">Choisissez votre forfait</h1>
+    <p class="page-subtitle">Plusieurs cartes générées avec la même fonction réutilisable.</p>
+    <section id="cards" aria-label="Offres tarifaires"></section>
+  </main>
+
+  <script>
+    function Card(titre, prix, fonctionnalites, options) {
+      const settings = options || {};
+      const article = document.createElement("article");
+      article.className = settings.featured ? "pricing is-featured" : "pricing";
+
+      const title = document.createElement("h2");
+      title.className = "title";
+      title.textContent = titre;
+
+      const price = document.createElement("p");
+      price.className = "price";
+      price.textContent = prix;
+
+      const list = document.createElement("ul");
+      list.className = "features";
+
+      fonctionnalites.forEach(function (item) {
+        const li = document.createElement("li");
+        li.textContent = item;
+        list.appendChild(li);
+      });
+
+      const button = document.createElement("button");
+      button.className = "btn";
+      button.type = "button";
+      button.textContent = settings.buttonText || "Démarrer l'essai";
+
+      const message = document.createElement("p");
+      message.className = "message";
+      message.setAttribute("aria-live", "polite");
+
+      button.addEventListener("click", function () {
+        const alreadySelected = button.classList.contains("is-selected");
+
+        if (alreadySelected) {
+          button.classList.remove("is-selected");
+          button.textContent = settings.buttonText || "Démarrer l'essai";
+          message.textContent = "";
+          return;
+        }
+
+        button.classList.add("is-selected");
+        button.textContent = "Essai activé";
+        message.textContent = "Vous avez choisi : " + titre;
+      });
+
+      article.append(title, price, list, button, message);
+      return article;
+    }
+
+    const cardsRoot = document.getElementById("cards");
+
+    const offres = [
+      {
+        titre: "Forfait de base",
+        prix: "9,99 $/mois",
+        fonctionnalites: [
+          "1 Go de stockage",
+          "Assistance de base",
+          "Toutes les fonctionnalités principales"
+        ]
+      },
+      {
+        titre: "Forfait Pro",
+        prix: "19,99 $/mois",
+        fonctionnalites: [
+          "50 Go de stockage",
+          "Assistance prioritaire",
+          "Statistiques avancées"
+        ],
+        featured: true,
+        buttonText: "Choisir Pro"
+      },
+      {
+        titre: "Forfait Entreprise",
+        prix: "49,99 $/mois",
+        fonctionnalites: [
+          "Stockage illimité",
+          "Gestionnaire dédié",
+          "Sécurité renforcée"
+        ],
+        buttonText: "Contacter l'équipe"
+      }
+    ];
+
+    offres.forEach(function (offre) {
+      cardsRoot.appendChild(
+        Card(offre.titre, offre.prix, offre.fonctionnalites, {
+          featured: offre.featured,
+          buttonText: offre.buttonText
+        })
+      );
+    });
+  </script>
+</body>
+</html>
