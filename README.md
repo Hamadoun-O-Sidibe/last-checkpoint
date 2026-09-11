@@ -52,3 +52,4 @@ Le fichier final a été ouvert dans le navigateur afin de vérifier :
 - l'effet hover
 - le fonctionnement du bouton
 - la création de plusieurs cartes
+- et tout est okay dans le projet
